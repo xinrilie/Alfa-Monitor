@@ -11,8 +11,8 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-SCRAPER = BASE_DIR / "src" / "merchants_monitor" / "scraper.py"
-NORMALIZER = BASE_DIR / "src" / "merchants_monitor" / "normalizer.py"
+SCRAPER = BASE_DIR / "src" / "scraper.py"
+NORMALIZER = BASE_DIR / "src" / "normalizer.py"
 
 RAW_DIR = BASE_DIR / "data" / "raw"
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
@@ -27,7 +27,7 @@ OUTPUT_FILES = [
     PROCESSED_DIR / "promo_price_review_remaining.csv",
 ]
 
-LOG_DIR = BASE_DIR / "reports" / "runs"
+LOG_DIR = BASE_DIR / "reports"
 
 # Batas waktu (detik) per langkah. Ubah di sini jika data membesar.
 SCRAPER_TIMEOUT = 120
@@ -112,6 +112,7 @@ def run_script(path, title, timeout_seconds):
 
     env = os.environ.copy()
     env["PYTHONUTF8"] = "1"
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
 
     proc = subprocess.Popen(
         [sys.executable, "-u", str(path)],

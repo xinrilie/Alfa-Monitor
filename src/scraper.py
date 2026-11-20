@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import re
+import sys
 import time
 
 from collections import OrderedDict
@@ -14,21 +15,22 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
+sys.dont_write_bytecode = True
 
 # =========================================================
 # KONFIGURASI
 # =========================================================
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
 REPORT_DIR = PROJECT_ROOT / "reports"
 
 OUT_JSON = RAW_DIR / "promo_catalog_module_a.json"
 OUT_CSV = RAW_DIR / "promo_catalog_products.csv"
-RUN_LOG = REPORT_DIR / "runs" / "promo_catalog_runlog.json"
+RUN_LOG = REPORT_DIR / "promo_catalog_runlog.json"
 ATTEMPT_JSON = RAW_DIR / "promo_catalog_latest_attempt.json"
 
-HISTORY_DIR = REPORT_DIR / "history" / "promo_catalog_history"
+HISTORY_DIR = REPORT_DIR
 MANUAL_URLS = PROJECT_ROOT / "promo_sources.txt"
 
 TODAY = datetime.now(ZoneInfo("Asia/Jakarta")).date()

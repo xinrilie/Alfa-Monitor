@@ -25,11 +25,11 @@ merchants-monitor/
 │   ├── raw/                 # Data langsung dari scraper
 │   └── processed/           # Katalog dan CSV hasil normalisasi
 ├── reports/
-│   ├── audits/              # Laporan audit sumber
-│   ├── history/              # Snapshot historis katalog
-│   └── runs/                 # Log pipeline
-├── scripts/                  # Utilitas audit dan verifikasi
-├── src/merchants_monitor/    # Scraper dan normalizer
+│   ├── promo_catalog_runlog.json
+│   └── <snapshot katalog>.json
+├── src/
+│   ├── scraper.py             # Ambil promo dari KatalogPromosi
+│   └── normalizer.py          # Rapikan data dan hitung flag harga
 ├── run_promo_monitor.py     # Entry point pipeline
 └── requirements.txt
 ```
