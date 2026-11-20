@@ -625,7 +625,13 @@ def discover_articles(
 
     candidates = [
         candidate for candidate in candidates
-        if promo_status(*parse_period_from_text(candidate.get("title_from_listing", ""))) != "expired"
+        if (
+            promo_status(*parse_period_from_text(candidate.get("title_from_listing", ""))) != "expired"
+            and not (
+                candidate.get("published_at")
+                and _is_stale_publication(candidate["published_at"])
+            )
+        )
     ]
     candidates.sort(
         key=sort_key,
@@ -633,6 +639,14 @@ def discover_articles(
     )
 
     return candidates, listing_log
+
+
+def _is_stale_publication(value: str) -> bool:
+    try:
+        published_date = datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+    except (TypeError, ValueError):
+        return False
+    return (TODAY - published_date).days > SEARCH_WINDOW_DAYS
 
 
 # =========================================================
