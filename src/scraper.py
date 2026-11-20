@@ -6,9 +6,9 @@ import re
 import time
 
 from collections import OrderedDict
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
-from urllib.parse import urljoin, urlparse, urldefrag, urlencode
+from urllib.parse import urljoin, urlparse, urldefrag
 from zoneinfo import ZoneInfo
 
 import requests
@@ -36,7 +36,6 @@ TODAY = datetime.now(ZoneInfo("Asia/Jakarta")).date()
 TIMEOUT = 15
 DELAY = 0.4
 
-MAX_LISTING_PAGES = 4
 MAX_ARTICLES = 18
 SEARCH_WINDOW_DAYS = 45
 
@@ -51,13 +50,6 @@ MERCHANT_CATEGORY_URLS = {
     "Alfamidi": "https://katalogpromosi.com/pasar-swalayan/alfamidi/",
     "Indomaret": "https://katalogpromosi.com/pasar-swalayan/indomaret/",
 }
-
-OFFICIAL_SOURCES = [
-    ("Alfamart In-Store", "https://alfamart.co.id/instore"),
-    ("Instagram Alfamart", "https://www.instagram.com/alfamart/"),
-    ("Alfagift Promo", "https://alfagift.id/promotion-products"),
-    ("Alfagift Campaign", "https://web-campaign.alfagift.id/promo"),
-]
 
 MONTHS = {
     "januari": 1,
@@ -356,81 +348,6 @@ def promo_status(
         return "expired"
 
     return "active"
-
-
-# =========================================================
-# PENGECEKAN SUMBER RESMI
-# =========================================================
-
-def check_official_sources(
-    session: requests.Session,
-) -> list[dict]:
-    results = []
-
-    for index, (name, url) in enumerate(
-        OFFICIAL_SOURCES,
-        start=1,
-    ):
-        say(
-            f"[RESMI {index}/{len(OFFICIAL_SOURCES)}] "
-            f"Memeriksa {name}..."
-        )
-
-        record = {
-            "name": name,
-            "url": url,
-            "status": "unknown",
-            "http_status": None,
-            "final_url": None,
-            "note": None,
-        }
-
-        try:
-            response = session.get(
-                url,
-                timeout=15,
-                allow_redirects=True,
-            )
-
-            record["http_status"] = response.status_code
-            record["final_url"] = response.url
-
-            body = response.text[:8000].casefold()
-
-            if response.status_code in (401, 403, 429):
-                record["status"] = "blocked_or_limited"
-                record["note"] = (
-                    "Tidak dicoba melewati proteksi."
-                )
-
-            elif any(
-                marker in body
-                for marker in (
-                    "captcha",
-                    "checking your browser",
-                    "verify you are human",
-                )
-            ):
-                record["status"] = "challenge_page"
-
-            elif response.ok:
-                record["status"] = "reachable"
-                record["note"] = (
-                    "Halaman merespons; belum tentu berisi "
-                    "rincian katalog promo yang dapat diekstrak."
-                )
-
-            else:
-                record["status"] = "http_error"
-
-        except requests.RequestException as exc:
-            record["status"] = "request_error"
-            record["note"] = f"{type(exc).__name__}: {exc}"
-
-        results.append(record)
-        time.sleep(DELAY)
-
-    return results
 
 
 # =========================================================
