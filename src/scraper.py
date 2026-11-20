@@ -23,14 +23,11 @@ sys.dont_write_bytecode = True
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
-REPORT_DIR = PROJECT_ROOT / "reports"
 
 OUT_JSON = RAW_DIR / "promo_catalog_module_a.json"
 OUT_CSV = RAW_DIR / "promo_catalog_products.csv"
-RUN_LOG = REPORT_DIR / "promo_catalog_runlog.json"
 ATTEMPT_JSON = RAW_DIR / "promo_catalog_latest_attempt.json"
 
-HISTORY_DIR = REPORT_DIR
 MANUAL_URLS = PROJECT_ROOT / "promo_sources.txt"
 
 TODAY = datetime.now(ZoneInfo("Asia/Jakarta")).date()
@@ -1353,21 +1350,6 @@ def main() -> None:
         save_json(ATTEMPT_JSON, payload)
 
         if validation["valid"]:
-            HISTORY_DIR.mkdir(
-                parents=True,
-                exist_ok=True,
-            )
-
-            history_file = (
-                HISTORY_DIR
-                / (
-                    datetime.now(ZoneInfo("Asia/Jakarta"))
-                    .strftime("%Y%m%d_%H%M%S")
-                    + ".json"
-                )
-            )
-
-            save_json(history_file, payload)
             save_json(OUT_JSON, payload)
             write_csv(OUT_CSV, products)
 
@@ -1375,32 +1357,6 @@ def main() -> None:
 
         else:
             output_status = "preserved_previous_catalog"
-
-        run_log = {
-            "checked_at": payload["checked_at"],
-            "output_status": output_status,
-            "validation": validation,
-            "listing_search_log": listing_log,
-            "article_count": len(articles),
-            "successful_articles": payload["successful_articles"],
-            "product_row_count": len(products),
-            "rows_with_price_quality_flags": quality_flags,
-            "articles": [
-                {
-                    "title": item.get("title"),
-                    "source_url": item.get("source_url"),
-                    "status": item.get("status"),
-                    "promo_status": item.get("promo_status"),
-                    "valid_from": item.get("valid_from"),
-                    "valid_until": item.get("valid_until"),
-                    "product_count": item.get("product_count"),
-                    "note": item.get("note"),
-                }
-                for item in articles
-            ],
-        }
-
-        save_json(RUN_LOG, run_log)
 
         elapsed = time.monotonic() - started
 
@@ -1420,7 +1376,6 @@ def main() -> None:
         say(f"Waktu                   : {elapsed:.1f} detik")
         say(f"Katalog terakhir        : {OUT_JSON}")
         say(f"Percobaan terbaru       : {ATTEMPT_JSON}")
-        say(f"Run log                 : {RUN_LOG}")
         say(f"CSV                     : {OUT_CSV}")
 
         if validation["reasons"]:

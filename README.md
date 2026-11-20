@@ -25,8 +25,7 @@ merchants-monitor/
 │   ├── raw/                 # Data langsung dari scraper
 │   └── processed/           # Katalog dan CSV hasil normalisasi
 ├── reports/
-│   ├── promo_catalog_runlog.json
-│   └── <snapshot katalog>.json
+│   └── run_latest.json       # Status pipeline terakhir
 ├── src/
 │   ├── scraper.py             # Ambil promo dari KatalogPromosi
 │   └── normalizer.py          # Rapikan data dan hitung flag harga
@@ -34,7 +33,7 @@ merchants-monitor/
 └── requirements.txt
 ```
 
-Output promo aktif berada di `data/processed/promo_active_clean.csv`. Detail artikel dan tautan gambar katalog ada di `data/raw/promo_catalog_module_a.json`.
+Workbook hasil pipeline berada di `data/processed/promo_monitor.xlsx`. Isinya satu tabel promo dengan filter merchant, status, dan masa berlaku. Harga hanya diisi jika terbaca jelas sebagai data produk; katalog yang hanya berupa gambar tetap bisa dibuka lewat tautan sumber. File data mentah dan laporan run tersimpan lokal dan diabaikan Git.
 
 ## Catatan sumber
 

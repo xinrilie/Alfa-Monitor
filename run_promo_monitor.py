@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import subprocess
 import sys
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 SCRAPER = BASE_DIR / "src" / "scraper.py"
 NORMALIZER = BASE_DIR / "src" / "normalizer.py"
+EXCEL_REPORT = BASE_DIR / "src" / "excel_report.py"
 
 RAW_DIR = BASE_DIR / "data" / "raw"
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
@@ -25,6 +28,7 @@ OUTPUT_FILES = [
     PROCESSED_DIR / "promo_active_clean.csv",
     PROCESSED_DIR / "promo_history_clean.csv",
     PROCESSED_DIR / "promo_price_review_remaining.csv",
+    PROCESSED_DIR / "promo_monitor.xlsx",
 ]
 
 LOG_DIR = BASE_DIR / "reports"
@@ -32,6 +36,7 @@ LOG_DIR = BASE_DIR / "reports"
 # Batas waktu (detik) per langkah. Ubah di sini jika data membesar.
 SCRAPER_TIMEOUT = 120
 NORMALIZER_TIMEOUT = 30
+EXCEL_REPORT_TIMEOUT = 60
 
 # Lock agar dua run tidak menulis file yang sama bersamaan.
 LOCK_FILE = BASE_DIR / "promo_monitor.lock"
@@ -52,14 +57,6 @@ def signature(path):
 def read_json(path):
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
-
-
-def show_captured_output(output):
-    if not output:
-        return
-    if isinstance(output, bytes):
-        output = output.decode("utf-8", errors="replace")
-    print(output, end="" if output.endswith("\n") else "\n", flush=True)
 
 
 def acquire_lock():
@@ -125,30 +122,64 @@ def run_script(path, title, timeout_seconds):
         errors="replace",
     )
 
-    try:
-        output, _ = proc.communicate(timeout=timeout_seconds)
-    except subprocess.TimeoutExpired as exc:
-        kill_process_tree(proc)
+    lines = queue.Queue()
+
+    def stream_output():
         try:
-            output, _ = proc.communicate(timeout=10)
-        except subprocess.TimeoutExpired:
-            output = exc.stdout
-        print(
-            f"\nTIMEOUT: {path.name} melewati "
-            f"{timeout_seconds} detik.",
-            flush=True,
-        )
-        show_captured_output(output)
-        raise RuntimeError(
-            f"{path.name} tidak selesai dalam batas waktu. "
-            "Proses (dan turunannya) dihentikan oleh runner."
-        ) from exc
+            for line in iter(proc.stdout.readline, ""):
+                lines.put(line)
+        finally:
+            lines.put(None)
+
+    reader = threading.Thread(target=stream_output, daemon=True)
+    reader.start()
+    deadline = time.monotonic() + timeout_seconds
+
+    try:
+        reader_finished = False
+        while not reader_finished:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0 and proc.poll() is None:
+                kill_process_tree(proc)
+                try:
+                    proc.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    pass
+                while True:
+                    try:
+                        item = lines.get_nowait()
+                    except queue.Empty:
+                        break
+                    if item is None:
+                        break
+                    print(item, end="", flush=True)
+                print(
+                    f"\nTIMEOUT: {path.name} melewati "
+                    f"{timeout_seconds} detik.",
+                    flush=True,
+                )
+                raise RuntimeError(
+                    f"{path.name} tidak selesai dalam batas waktu. "
+                    "Proses (dan turunannya) dihentikan oleh runner."
+                )
+
+            try:
+                item = lines.get(timeout=min(0.25, max(0.01, remaining)))
+            except queue.Empty:
+                if proc.poll() is not None and not reader.is_alive():
+                    break
+                continue
+
+            if item is None:
+                reader_finished = True
+            else:
+                print(item, end="", flush=True)
+
+        proc.wait()
     except BaseException:
         # Ctrl+C atau error lain: jangan tinggalkan proses yatim.
         kill_process_tree(proc)
         raise
-
-    show_captured_output(output)
 
     if proc.returncode != 0:
         raise RuntimeError(
@@ -158,7 +189,7 @@ def run_script(path, title, timeout_seconds):
 
 def validate_scrape(previous_attempt_sig, previous_raw_sig):
     print("\n" + "=" * 60)
-    print("[2/4] VALIDASI SCRAPING")
+    print("[2/5] VALIDASI SCRAPING")
     print("=" * 60)
 
     if not ATTEMPT_JSON.is_file():
@@ -196,7 +227,7 @@ def validate_scrape(previous_attempt_sig, previous_raw_sig):
 
 def verify_outputs(since_ns):
     print("\n" + "=" * 60)
-    print("[4/4] VERIFIKASI FILE OUTPUT")
+    print("[5/5] VERIFIKASI FILE OUTPUT")
     print("=" * 60)
     failures = []
 
@@ -218,8 +249,7 @@ def verify_outputs(since_ns):
 
 def save_log(data):
     LOG_DIR.mkdir(parents=True, exist_ok=True)
-    filename = "run_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".json"
-    path = LOG_DIR / filename
+    path = LOG_DIR / "run_latest.json"
 
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -268,7 +298,7 @@ def main():
 
         run_step(
             log, "scraping", run_script,
-            SCRAPER, "[1/4] SCRAPING KATALOG PROMO", SCRAPER_TIMEOUT,
+            SCRAPER, "[1/5] SCRAPING KATALOG PROMO", SCRAPER_TIMEOUT,
         )
 
         run_step(
@@ -279,7 +309,12 @@ def main():
         normalize_started_ns = time.time_ns()
         run_step(
             log, "normalization", run_script,
-            NORMALIZER, "[3/4] NORMALISASI HARGA PROMO", NORMALIZER_TIMEOUT,
+            NORMALIZER, "[3/5] NORMALISASI HARGA PROMO", NORMALIZER_TIMEOUT,
+        )
+
+        run_step(
+            log, "excel_report", run_script,
+            EXCEL_REPORT, "[4/5] MEMBUAT LAPORAN EXCEL", EXCEL_REPORT_TIMEOUT,
         )
 
         run_step(

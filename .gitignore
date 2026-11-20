@@ -3,3 +3,9 @@ __pycache__/
 *.tmp
 *.lock
 promo_sources.txt
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+reports/*
+!reports/.gitkeep
