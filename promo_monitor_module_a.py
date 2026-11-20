@@ -618,11 +618,15 @@ def discover_articles(
         published = candidate.get("published_at") or ""
         return (
             status_rank,
-            end_date,
             published,
+            end_date,
             normalize_text(title),
         )
 
+    candidates = [
+        candidate for candidate in candidates
+        if promo_status(*parse_period_from_text(candidate.get("title_from_listing", ""))) != "expired"
+    ]
     candidates.sort(
         key=sort_key,
         reverse=True,
@@ -1133,6 +1137,18 @@ def fetch_article(
             final_url,
         )
 
+        result["summary"] = " ".join(lead_paragraphs[:3])[:1200]
+        result["promo_images"] = []
+        for image in container.find_all("img"):
+            image_url = image.get("data-src") or image.get("data-lazy-src") or image.get("src")
+            if not image_url or image_url.startswith("data:"):
+                continue
+            result["promo_images"].append({
+                "url": urljoin(final_url, image_url),
+                "alt": (image.get("alt") or "").strip(),
+            })
+        result["promo_images"] = result["promo_images"][:30]
+
         for product in products:
             product["merchant"] = result["merchant"]
             product["campaign_title"] = title
@@ -1246,10 +1262,20 @@ def validate_run(
             f"minimal {MIN_PRODUCT_ROWS}."
         )
 
+    found_merchants = {
+        item.get("merchant")
+        for item in successful
+        if item.get("merchant")
+    }
+    missing_merchants = sorted(set(MERCHANT_CATEGORY_URLS) - found_merchants)
+    if missing_merchants:
+        reasons.append("Merchant tidak berhasil diambil: " + ", ".join(missing_merchants) + ".")
+
     return {
         "valid": not reasons,
         "successful_articles": len(successful),
         "valid_product_rows": len(valid_products),
+        "merchants_found": sorted(found_merchants),
         "reasons": reasons,
     }
 
@@ -1283,7 +1309,14 @@ def main() -> None:
                     "query_term": "manual",
                 })
 
-        selected = candidates[:MAX_ARTICLES]
+        selected = []
+        per_merchant_limit = max(1, MAX_ARTICLES // len(MERCHANT_CATEGORY_URLS))
+        for merchant in MERCHANT_CATEGORY_URLS:
+            selected.extend([
+                item for item in candidates
+                if item.get("query_term") == merchant
+            ][:per_merchant_limit])
+        selected = selected[:MAX_ARTICLES]
 
         say(
             f"\nArtikel dipilih: {len(selected)} "

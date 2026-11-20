@@ -1,0 +1,230 @@
+{
+  "checked_at": "2026-11-20T22:13:12.131233+07:00",
+  "output_status": "updated",
+  "validation": {
+    "valid": true,
+    "successful_articles": 18,
+    "valid_product_rows": 3,
+    "reasons": []
+  },
+  "listing_search_log": [
+    {
+      "page": 1,
+      "url": "https://katalogpromosi.com/",
+      "status": "ok",
+      "links_seen": 213,
+      "relevant_articles": 4,
+      "error": null
+    },
+    {
+      "page": 2,
+      "url": "https://katalogpromosi.com/pasar-swalayan/alfamart/",
+      "status": "ok",
+      "links_seen": 112,
+      "relevant_articles": 15,
+      "error": null
+    },
+    {
+      "page": 3,
+      "url": "https://katalogpromosi.com/pasar-swalayan/alfamidi/",
+      "status": "ok",
+      "links_seen": 100,
+      "relevant_articles": 17,
+      "error": null
+    },
+    {
+      "page": 4,
+      "url": "https://katalogpromosi.com/pasar-swalayan/indomaret/",
+      "status": "ok",
+      "links_seen": 111,
+      "relevant_articles": 18,
+      "error": null
+    }
+  ],
+  "article_count": 18,
+  "successful_articles": 18,
+  "product_row_count": 3,
+  "rows_with_price_quality_flags": 1,
+  "articles": [
+    {
+      "title": "PROMO PSM ALFAMART 24-30 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-psm-alfamart-mingguan",
+      "status": "ok",
+      "promo_status": "upcoming",
+      "valid_from": "2026-11-24",
+      "valid_until": "2026-11-30",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "PROMO ALFAMART PALING MURAH SEJAGAT 24-30 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-alfamart-paling-murah-sejagat-terbaru-minggu-ini",
+      "status": "ok",
+      "promo_status": "upcoming",
+      "valid_from": "2026-11-24",
+      "valid_until": "2026-11-30",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo Alfamart Serba Gratis 16-30 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-alfamart-serba-gratis-terbaru-hari-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-16",
+      "valid_until": "2026-11-30",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "PROMO PSM ALFAMART 16-23 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-psm-alfamart-minggu-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-16",
+      "valid_until": "2026-11-23",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "PROMO ALFAMART PALING MURAH SEJAGAT 16-23 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-alfamart-paling-murah-sejagat-minggu-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-16",
+      "valid_until": "2026-11-23",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo JSM Alfamart Terbaru 20-22 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-jsm-alfamart-weekend-20-22-nov-2026",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-20",
+      "valid_until": "2026-11-22",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "KATALOG PROMO ALFAMIDI TERBARU 16-30 November 2026",
+      "source_url": "https://katalogpromosi.com/katalog-promo-alfamidi-terbaru-hari-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-16",
+      "valid_until": "2026-11-30",
+      "product_count": 1,
+      "note": null
+    },
+    {
+      "title": "Promo JSM ALFAMIDI MINGGU INI 20-22 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-jsm-alfamidi-minggu-ini-20-22-nov-2026",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-20",
+      "valid_until": "2026-11-22",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo HAP ALFAMIDI periode 16-22 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-hap-alfamidi-minggu-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-16",
+      "valid_until": "2026-11-22",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo Alfamidi Valentine’s Fair Cokelat Harga Spesial",
+      "source_url": "https://katalogpromosi.com/promo-alfamidi-valentines-fair-cokelat-harga-spesial",
+      "status": "ok",
+      "promo_status": "expired",
+      "valid_from": "2026-02-01",
+      "valid_until": "2026-02-15",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo Alfamidi Valentine SilverQueen Chunky Bar 1kg",
+      "source_url": "https://katalogpromosi.com/promo-alfamidi-valentine-silverqueen-chunky-bar-1kg",
+      "status": "ok",
+      "promo_status": "expired",
+      "valid_from": "2026-02-06",
+      "valid_until": "2026-02-15",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo Alfamidi Two For Tuesday Beli 2 Gratis 1",
+      "source_url": "https://katalogpromosi.com/promo-alfamidi-two-for-tuesday-beli-2-gratis-1",
+      "status": "ok",
+      "promo_status": "expired",
+      "valid_from": "2026-05-05",
+      "valid_until": "2026-05-05",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo Indomaret Tebus Murah PWP 12-25 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-indomaret-tebus-murah-pwp-minggu-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-12",
+      "valid_until": "2026-11-25",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo INDOMARET PALING MURAH 19-25 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-indomaret-paling-murah-19-25-november-2026",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-19",
+      "valid_until": "2026-11-25",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "PROMO INDOMARET Hemat Minggu ini 19-25 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-indomaret-hemat-minggu-ini-19-25-nov-2026",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-19",
+      "valid_until": "2026-11-25",
+      "product_count": 1,
+      "note": null
+    },
+    {
+      "title": "Promo Indomaret Harga Khusus Member 19-25 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-indomaret-tebus-member-minggu-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-19",
+      "valid_until": "2026-11-25",
+      "product_count": 0,
+      "note": null
+    },
+    {
+      "title": "Promo Indomaret Gebyar Diskon Akhir Tahun Sirup & Biskuit 19-25 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-indomaret-gebyar-diskon-akhir-tahun",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-19",
+      "valid_until": "2026-11-25",
+      "product_count": 1,
+      "note": null
+    },
+    {
+      "title": "PROMO BERHADIAH INDOMARET 12-25 November 2026",
+      "source_url": "https://katalogpromosi.com/promo-indomaret-bulan-ini",
+      "status": "ok",
+      "promo_status": "active",
+      "valid_from": "2026-11-12",
+      "valid_until": "2026-11-25",
+      "product_count": 0,
+      "note": null
+    }
+  ]
+}
