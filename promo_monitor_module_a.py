@@ -38,14 +38,17 @@ MAX_LISTING_PAGES = 4
 MAX_ARTICLES = 18
 SEARCH_WINDOW_DAYS = 45
 
-MIN_SUCCESSFUL_ARTICLES = 2
-MIN_PRODUCT_ROWS = 5
+MIN_SUCCESSFUL_ARTICLES = 1
+MIN_PRODUCT_ROWS = 1
 
-ARTICLE_HOST = "momsmoney.kontan.co.id"
+ARTICLE_HOST = "katalogpromosi.com"
 
-HEMAT_CATEGORY_URL = (
-    "https://momsmoney.kontan.co.id/rubrik/342/Hemat"
-)
+HOME_URL = "https://katalogpromosi.com/"
+MERCHANT_CATEGORY_URLS = {
+    "Alfamart": "https://katalogpromosi.com/pasar-swalayan/alfamart/",
+    "Alfamidi": "https://katalogpromosi.com/pasar-swalayan/alfamidi/",
+    "Indomaret": "https://katalogpromosi.com/pasar-swalayan/indomaret/",
+}
 
 OFFICIAL_SOURCES = [
     ("Alfamart In-Store", "https://alfamart.co.id/instore"),
@@ -122,7 +125,7 @@ def clean_article_url(url: str) -> str:
     if (parsed.hostname or "").lower() != ARTICLE_HOST:
         return ""
 
-    if not parsed.path.startswith("/news/"):
+    if parsed.path in {"", "/"} or parsed.path.startswith(("/pasar-swalayan/", "/kategori/")):
         return ""
 
     return parsed._replace(
@@ -139,24 +142,18 @@ def is_article_url(url: str) -> bool:
     return (
         parsed.scheme in {"http", "https"}
         and (parsed.hostname or "").lower() == ARTICLE_HOST
-        and parsed.path.startswith("/news/")
+        and parsed.path not in {"", "/"}
+        and not parsed.path.startswith(("/pasar-swalayan/", "/kategori/"))
     )
 
 
 def is_relevant_title(title: str) -> bool:
     """
-    Hanya artikel yang jelas menyebut promo Alfamart/Alfagift.
-    Judul Indomaret atau berita umum harus ditolak.
+    Batasi hasil ke promo tiga merchant yang diminta.
     """
     text = normalize_text(title)
 
-    if "indomaret" in text:
-        return False
-
-    if not (
-        "alfamart" in text
-        or "alfagift" in text
-    ):
+    if not any(merchant in text for merchant in ("alfamart", "alfamidi", "indomaret")):
         return False
 
     keywords = (
@@ -176,6 +173,14 @@ def is_relevant_title(title: str) -> bool:
     )
 
     return any(word in text for word in keywords)
+
+
+def merchant_from_text(text: str) -> str | None:
+    normalized = normalize_text(text)
+    for merchant in ("Alfamart", "Alfamidi", "Indomaret"):
+        if merchant.casefold() in normalized:
+            return merchant
+    return None
 
 
 def campaign_type(title: str) -> str:
@@ -486,16 +491,9 @@ def discover_articles(
     listing_log = []
     seen_urls = set()
 
-    for page_number in range(1, MAX_LISTING_PAGES + 1):
-        listing_url = HEMAT_CATEGORY_URL
-
-        if page_number > 1:
-            listing_url += f"?page={page_number}"
-
-        say(
-            f"[DAFTAR {page_number}/{MAX_LISTING_PAGES}] "
-            f"Membaca kategori Hemat..."
-        )
+    listing_urls = [("Beranda", HOME_URL)] + list(MERCHANT_CATEGORY_URLS.items())
+    for page_number, (merchant_scope, listing_url) in enumerate(listing_urls, start=1):
+        say(f"[DAFTAR {page_number}/{len(listing_urls)}] Membaca {merchant_scope}...")
         say(f"  URL: {listing_url}")
 
         record = {
@@ -531,7 +529,7 @@ def discover_articles(
                 "html.parser",
             )
 
-            links = soup.select('a[href*="/news/"]')
+            links = soup.select("a[href]")
             record["links_seen"] = len(links)
             record["status"] = "ok"
 
@@ -544,7 +542,7 @@ def discover_articles(
 
                 article_url = clean_article_url(absolute_url)
 
-                if not article_url:
+                if not article_url or urlparse(article_url).hostname != ARTICLE_HOST:
                     continue
 
                 title = get_anchor_title(anchor)
@@ -552,18 +550,30 @@ def discover_articles(
                 if not is_relevant_title(title):
                     continue
 
+                title_normalized = normalize_text(title)
+                if merchant_scope in MERCHANT_CATEGORY_URLS and merchant_scope.casefold() not in title_normalized:
+                    continue
+
                 if article_url in seen_urls:
                     continue
 
                 seen_urls.add(article_url)
 
+                published_at = None
+                for parent in anchor.parents:
+                    time_node = parent.find("time")
+                    if time_node:
+                        published_at = time_node.get("datetime") or time_node.get_text(" ", strip=True)
+                        break
+                    if parent.name in {"article", "body"}:
+                        break
+
                 candidates.append({
                     "title_from_listing": title,
                     "url": article_url,
-                    "discovery_source": (
-                        "Momsmoney Hemat listing"
-                    ),
-                    "query_term": f"halaman_{page_number}",
+                    "discovery_source": f"KatalogPromosi {merchant_scope}",
+                    "query_term": merchant_scope,
+                    "published_at": published_at,
                 })
 
                 record["relevant_articles"] += 1
@@ -595,8 +605,8 @@ def discover_articles(
         status_rank = {
             "upcoming": 3,
             "active": 2,
-            "expired": 1,
-            "unknown": 0,
+            "unknown": 1,
+            "expired": 0,
         }.get(status, 0)
 
         end_date = (
@@ -605,9 +615,11 @@ def discover_articles(
             else date.min
         )
 
+        published = candidate.get("published_at") or ""
         return (
             status_rank,
             end_date,
+            published,
             normalize_text(title),
         )
 
@@ -1000,7 +1012,7 @@ def fetch_article(
         "query_term": candidate.get("query_term"),
         "title": None,
         "source_type": "secondary",
-        "source_name": "Momsmoney / Kontan",
+        "source_name": "KatalogPromosi",
         "campaign_type": "unknown",
         "published_at": None,
         "valid_from": None,
@@ -1050,6 +1062,8 @@ def fetch_article(
 
         result["title"] = title
         result["source_url"] = final_url
+        result["merchant"] = merchant_from_text(title)
+        result["published_at"] = candidate.get("published_at")
 
         # Filter ulang menggunakan judul halaman yang sebenarnya.
         if not is_relevant_title(title):
@@ -1077,7 +1091,7 @@ def fetch_article(
             result["published_at"] = (
                 published_meta.get("content")
                 or published_meta.get("datetime")
-            )
+            ) or result["published_at"]
 
         if not result["published_at"]:
             time_node = soup.find("time")
@@ -1120,6 +1134,7 @@ def fetch_article(
         )
 
         for product in products:
+            product["merchant"] = result["merchant"]
             product["campaign_title"] = title
             product["campaign_type"] = result["campaign_type"]
             product["valid_from"] = start
@@ -1255,9 +1270,7 @@ def main() -> None:
     })
 
     try:
-        official_checks = check_official_sources(session)
-
-        # Cari artikel promo terkini dari empat halaman listing.
+        # Ambil daftar terbaru dari beranda dan halaman masing-masing merchant.
         candidates, listing_log = discover_articles(session)
 
         # URL manual bersifat opsional.
@@ -1341,8 +1354,8 @@ def main() -> None:
             "checked_at": timestamp(),
             "reference_date": TODAY.isoformat(),
             "module": "A - promo source collector",
-            "source_type": "secondary_public_articles",
-            "listing_url": HEMAT_CATEGORY_URL,
+            "source_type": "KatalogPromosi public articles",
+            "listing_url": HOME_URL,
             "listing_pages_checked": len(listing_log),
             "article_count": len(articles),
             "successful_articles": sum(
@@ -1355,7 +1368,7 @@ def main() -> None:
             "expired_product_rows": expired_count,
             "unknown_period_product_rows": unknown_count,
             "rows_with_price_quality_flags": quality_flags,
-            "official_source_checks": official_checks,
+            "merchant_scope": list(MERCHANT_CATEGORY_URLS),
             "listing_search_log": listing_log,
             "articles": articles,
             "products": products,
