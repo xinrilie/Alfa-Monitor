@@ -11,21 +11,23 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-SCRAPER = BASE_DIR / "promo_monitor_module_a.py"
-NORMALIZER = BASE_DIR / "normalize_price_flags.py"
+SCRAPER = BASE_DIR / "src" / "merchants_monitor" / "scraper.py"
+NORMALIZER = BASE_DIR / "src" / "merchants_monitor" / "normalizer.py"
 
-ATTEMPT_JSON = BASE_DIR / "promo_catalog_latest_attempt.json"
-RAW_JSON = BASE_DIR / "promo_catalog_module_a.json"
+RAW_DIR = BASE_DIR / "data" / "raw"
+PROCESSED_DIR = BASE_DIR / "data" / "processed"
+ATTEMPT_JSON = RAW_DIR / "promo_catalog_latest_attempt.json"
+RAW_JSON = RAW_DIR / "promo_catalog_module_a.json"
 
 OUTPUT_FILES = [
-    BASE_DIR / "promo_catalog_module_a_clean.json",
-    BASE_DIR / "promo_catalog_products_clean.csv",
-    BASE_DIR / "promo_active_clean.csv",
-    BASE_DIR / "promo_history_clean.csv",
-    BASE_DIR / "promo_price_review_remaining.csv",
+    PROCESSED_DIR / "promo_catalog_module_a_clean.json",
+    PROCESSED_DIR / "promo_catalog_products_clean.csv",
+    PROCESSED_DIR / "promo_active_clean.csv",
+    PROCESSED_DIR / "promo_history_clean.csv",
+    PROCESSED_DIR / "promo_price_review_remaining.csv",
 ]
 
-LOG_DIR = BASE_DIR / "promo_monitor_logs"
+LOG_DIR = BASE_DIR / "reports" / "runs"
 
 # Batas waktu (detik) per langkah. Ubah di sini jika data membesar.
 SCRAPER_TIMEOUT = 120

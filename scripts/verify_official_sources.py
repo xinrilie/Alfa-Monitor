@@ -20,13 +20,15 @@ from bs4 import BeautifulSoup
 # KONFIGURASI
 # =========================================================
 
-BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-CLEAN_JSON = BASE_DIR / "promo_catalog_module_a_clean.json"
-RAW_JSON = BASE_DIR / "promo_catalog_module_a.json"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
+RAW_DIR = PROJECT_ROOT / "data" / "raw"
+CLEAN_JSON = PROCESSED_DIR / "promo_catalog_module_a_clean.json"
+RAW_JSON = RAW_DIR / "promo_catalog_module_a.json"
 
-OUTPUT_JSON = BASE_DIR / "promo_official_verification.json"
-OUTPUT_CSV = BASE_DIR / "promo_official_verification.csv"
+OUTPUT_JSON = PROJECT_ROOT / "reports" / "audits" / "promo_official_verification.json"
+OUTPUT_CSV = PROJECT_ROOT / "reports" / "audits" / "promo_official_verification.csv"
 
 OFFICIAL_DOMAIN = "blog.alfagift.id"
 PROMO_CATEGORY = "https://blog.alfagift.id/promo/"

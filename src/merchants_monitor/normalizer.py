@@ -15,15 +15,17 @@ from typing import Any
 # KONFIGURASI
 # =========================================================
 
-BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RAW_DIR = PROJECT_ROOT / "data" / "raw"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 
-RAW_JSON = BASE_DIR / "promo_catalog_module_a.json"
+RAW_JSON = RAW_DIR / "promo_catalog_module_a.json"
 
-CLEAN_JSON = BASE_DIR / "promo_catalog_module_a_clean.json"
-CLEAN_CSV = BASE_DIR / "promo_catalog_products_clean.csv"
-ACTIVE_CSV = BASE_DIR / "promo_active_clean.csv"
-HISTORY_CSV = BASE_DIR / "promo_history_clean.csv"
-REVIEW_CSV = BASE_DIR / "promo_price_review_remaining.csv"
+CLEAN_JSON = PROCESSED_DIR / "promo_catalog_module_a_clean.json"
+CLEAN_CSV = PROCESSED_DIR / "promo_catalog_products_clean.csv"
+ACTIVE_CSV = PROCESSED_DIR / "promo_active_clean.csv"
+HISTORY_CSV = PROCESSED_DIR / "promo_history_clean.csv"
+REVIEW_CSV = PROCESSED_DIR / "promo_price_review_remaining.csv"
 
 
 # =========================================================
